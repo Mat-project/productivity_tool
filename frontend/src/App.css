@@ -1,8 +1,50 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  border-right: 1px solid rgb(229, 231, 235);
+  background-color: white;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 0;
+    min-width: 0;
+    position: fixed;
+    z-index: 50;
+    transition: width 0.3s ease-in-out;
+  }
+
+  .sidebar.open {
+    width: 280px;
+    min-width: 280px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    background-color: rgb(31, 41, 55);
+    border-right-color: rgb(55, 65, 81);
+  }
 }
 
 .logo {

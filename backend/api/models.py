@@ -9,29 +9,36 @@ class User(AbstractUser):
     class Meta:
         db_table = 'users'
 
-class Task(models.Model):
-    title = models.CharField(max_length=200)
+    def __str__(self):
+        return self.username
+
+class Project(models.Model):
+    title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ('todo', 'To Do'),
-            ('in_progress', 'In Progress'),
-            ('completed', 'Completed')
-        ],
-        default='todo'
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'projects'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+class Task(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
     )
-    priority = models.CharField(
-        max_length=20,
-        choices=[
-            ('low', 'Low'),
-            ('medium', 'Medium'),
-            ('high', 'High')
-        ],
-        default='medium'
-    )
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     due_date = models.DateTimeField(null=True, blank=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tasks')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -39,22 +46,5 @@ class Task(models.Model):
         db_table = 'tasks'
         ordering = ['-created_at']
 
-class Project(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ('active', 'Active'),
-            ('completed', 'Completed'),
-            ('on_hold', 'On Hold')
-        ],
-        default='active'
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'projects'
-        ordering = ['-created_at']
+    def __str__(self):
+        return self.title

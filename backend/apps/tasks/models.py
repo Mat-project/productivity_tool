@@ -1,6 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
-from apps.projects.models import Project
+from django.conf import settings
 
 class Task(models.Model):
     title = models.CharField(max_length=200)
@@ -11,23 +10,17 @@ class Task(models.Model):
     completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
     
-    project = models.ForeignKey(
-        Project, 
-        on_delete=models.CASCADE,
-        related_name='tasks'
-    )
-    
     assigned_to = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='assigned_tasks'
+        related_name='task_assignments'
     )
     
     created_by = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name='created_tasks'
+        related_name='task_creations'
     )
     
     priority = models.CharField(
@@ -52,8 +45,8 @@ class Task(models.Model):
         default='todo'
     )
 
-    def __str__(self):
-        return self.title
-
     class Meta:
         ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title

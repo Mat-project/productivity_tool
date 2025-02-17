@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { authAPI } from '../../utils/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
-    login: '',
+    username: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,20 +28,13 @@ export default function LoginForm() {
     setError('');
 
     try {
-      console.log('Sending login data:', formData);
-      const response = await authAPI.login(formData);
-      console.log('Login response:', response.data);
-
-      // Store tokens and user data
-      localStorage.setItem('accessToken', response.data.access);
-      localStorage.setItem('refreshToken', response.data.refresh);
-      if (response.data.user) {
-        localStorage.setItem('userData', JSON.stringify(response.data.user));
+      const result = await login(formData);
+      if (!result.success) {
+        setError(result.error || 'Login failed. Please try again.');
+      } else {
+        // Navigate to dashboard
+        navigate('/dashboard');
       }
-
-      // Navigate to dashboard
-      navigate('/dashboard');
-      
     } catch (err) {
       console.error('Login error:', err);
       setError(err.response?.data?.detail || 'Login failed. Please try again.');
@@ -79,18 +73,18 @@ export default function LoginForm() {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="login" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email or Username
               </label>
               <div className="mt-1">
                 <input
-                  id="login"
-                  name="login"
+                  id="username"
+                  name="username"
                   type="text"
                   required
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm"
                   placeholder="Enter your email or username"
-                  value={formData.login}
+                  value={formData.username}
                   onChange={handleChange}
                 />
               </div>

@@ -5,35 +5,16 @@ import Dashboard from './components/dashboard/Dashboard';
 import DashboardLayout from './components/layout/DashboardLayout';
 import TaskPage from './pages/TaskPage';
 import TaskBoardPage from './pages/TaskBoardPage';
+import ProjectPage from './pages/ProjectPage';
+import ProjectDetail from './components/projects/ProjectDetail';
 import { useEffect, useState } from 'react';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
-  const accessToken = localStorage.getItem('accessToken');
+  const { isAuthenticated, isLoading } = useAuth();
   
-  if (!accessToken) {
-    return <Navigate to="/login" />;
-  }
-  
-  return children;
-};
-
-function App() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('accessToken');
-      setIsAuthenticated(!!token);
-      setIsLoading(false);
-    };
-
-    checkAuth();
-  }, []);
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -41,15 +22,23 @@ function App() {
       </div>
     );
   }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  
+  return children;
+};
 
+function App() {
   return (
     <Router>
       <ThemeProvider>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
-            <Route path="/login" element={!isAuthenticated ? <LoginForm /> : <Navigate to="/dashboard" />} />
-            <Route path="/register" element={!isAuthenticated ? <RegisterForm /> : <Navigate to="/dashboard" />} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/register" element={<RegisterForm />} />
             
             {/* Protected Dashboard Routes */}
             <Route
@@ -63,9 +52,12 @@ function App() {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="tasks" element={<TaskPage />} />
               <Route path="board" element={<TaskBoardPage />} />
-              <Route path="projects" element={<div className="p-6"><h1 className="text-2xl font-bold">Projects</h1></div>} />
-              <Route path="files" element={<div className="p-6"><h1 className="text-2xl font-bold">Files</h1></div>} />
+              <Route path="projects" element={<ProjectPage />} />
+              <Route path="projects/:id" element={<ProjectDetail />} />
             </Route>
+
+            {/* Catch-all route for 404 */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AuthProvider>
       </ThemeProvider>
